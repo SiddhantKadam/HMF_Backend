@@ -30,6 +30,7 @@ public class UserServiceImpl implements UserService {
                 userMaster.setUserStatus("Active");
                 userDao.save(userMaster);
                 userRegistrationResDto.setMessage("Save Succesfully");
+                userRegistrationResDto.setUserId(userMaster.getUserId());
             } catch (Exception e) {
                 e.printStackTrace();
                 userRegistrationResDto.setMessage("Failed");
@@ -109,6 +110,18 @@ public class UserServiceImpl implements UserService {
             return true;
         } else {
             return false;
+        }
+    }
+
+    @Override
+    public Boolean userForgotPassword(String userMobileNo) {
+        UserMaster userMaster1 = userDao.findOneByUserMobileNo(userMobileNo);
+        if (userMaster1 == null) {
+            System.out.println("OTP False");
+            return false;
+        } else {
+            System.out.println("OTP True");
+            return true;
         }
     }
 }

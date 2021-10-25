@@ -36,14 +36,17 @@ public class VendorMaster {
     @Column(length = 50)
     private String vendorBusinessName;
 
-//    @Column(length = 20)
-//    private String vendorBusinessCategory;
+    @Column(length = 500)
+    private String vendorBusinessImage;
 
     @Column(length = 100)
     private String vendorBusinessAddress;
 
-    @Column(length = 20)
+    @Column(length = 500)
     private String vendorBusinessProof;
+
+    @Column(length = 20)
+    private String registrationType;
 
     @Column(length = 20)
     private String vendorStatus;

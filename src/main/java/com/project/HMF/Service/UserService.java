@@ -19,4 +19,6 @@ public interface UserService {
     UserRegistrationResDto update(UserMaster userMaster);
 
     Boolean updatePassword(Integer userId, String password);
+
+    Boolean userForgotPassword(String userMobileNo);
 }

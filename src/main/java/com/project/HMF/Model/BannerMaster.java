@@ -19,7 +19,7 @@ public class BannerMaster {
     @Column(length = 10)
     private Integer bannerId;
 
-    @Column(length = 20)
+    @Column(length = 500)
     private String bannerImage;
 
     @Column(length = 20)

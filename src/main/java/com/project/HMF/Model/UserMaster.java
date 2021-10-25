@@ -31,5 +31,8 @@ public class UserMaster {
     private String userPassword;
 
     @Column(length = 20)
+    private String registrationType;
+
+    @Column(length = 20)
     private String userStatus;
 }

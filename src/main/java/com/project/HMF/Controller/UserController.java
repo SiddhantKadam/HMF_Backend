@@ -46,7 +46,7 @@ public class UserController {
         return new ResponseEntity(list, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/{userId}")
+    @GetMapping(value = "/getById/{userId}")
     private ResponseEntity getUserById(@PathVariable Integer userId) {
         UserMaster userMaster = userService.getUserById(userId);
         if (userMaster != null) {
@@ -56,10 +56,17 @@ public class UserController {
         }
     }
 
-    @GetMapping(value = "/{userId}/{password}")
+    @GetMapping(value = "/changePassword/{userId}/{password}")
     private ResponseEntity userChangePassword(@PathVariable Integer userId, @PathVariable String password) {
         Boolean flag = userService.updatePassword(userId, password);
         return new ResponseEntity(flag, HttpStatus.CREATED);
+    }
+
+    @GetMapping(value = "/userForgotPassword/{userMobileNo}")
+    public ResponseEntity userForgotPassword(@PathVariable String userMobileNo)
+    {
+        Boolean flag = userService.userForgotPassword(userMobileNo);
+        return new ResponseEntity(flag,HttpStatus.OK);
     }
 
 }

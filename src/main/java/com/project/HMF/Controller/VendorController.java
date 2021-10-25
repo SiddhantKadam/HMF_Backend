@@ -51,7 +51,7 @@ public class VendorController {
         return new ResponseEntity(list, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/{vendorId}")
+    @GetMapping(value = "/getById/{vendorId}")
     private ResponseEntity getVendorById(@PathVariable Integer vendorId) {
         VendorMaster vendorMaster = vendorService.getVendorById(vendorId);
         if (vendorMaster != null) {
@@ -61,10 +61,30 @@ public class VendorController {
         }
     }
 
-    @PutMapping(value = "/{vendorSubscription}")
+    @PutMapping(value = "/updateSubscription/{vendorSubscription}")
     private ResponseEntity updateSubscription(@RequestBody VendorSubscriptionReqDto vendorSubscriptionReqDto){
         Boolean flag = vendorService.updateSubscription(vendorSubscriptionReqDto);
         return new ResponseEntity(flag, HttpStatus.CREATED);
+    }
+
+    @GetMapping(value = "/changePassword/{vendorId}/{password}")
+    private ResponseEntity vendorChangePassword(@PathVariable Integer vendorId, @PathVariable String password) {
+        Boolean flag = vendorService.updatePassword(vendorId, password);
+        return new ResponseEntity(flag, HttpStatus.CREATED);
+    }
+
+    @GetMapping(value = "/vendorForgotPassword/{vendorMobileNo}")
+    public ResponseEntity vendorForgotPassword(@PathVariable String vendorMobileNo)
+    {
+        Boolean flag = vendorService.vendorForgotPassword(vendorMobileNo);
+        return new ResponseEntity(flag,HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/businessList")
+    public ResponseEntity getAllBusinessList()
+    {
+        List list = vendorService.getAllBusinessList();
+        return new ResponseEntity(list,HttpStatus.OK);
     }
 
 }

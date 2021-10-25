@@ -43,7 +43,7 @@ public class BannerController {
         return new ResponseEntity(list, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/{bannerId}")
+    @GetMapping(value = "/getById/{bannerId}")
     private ResponseEntity getBannerById(@PathVariable Integer bannerId) {
         BannerMaster bannerMaster = bannerService.getBannerById(bannerId);
         if (bannerMaster != null) {

@@ -20,4 +20,10 @@ public interface VendorService {
     VendorRegistrationResDto update(VendorMaster vendorMaster);
 
     Boolean updateSubscription(VendorSubscriptionReqDto vendorSubscriptionReqDto);
+
+    Boolean updatePassword(Integer vendorId, String password);
+
+    Boolean vendorForgotPassword(String vendorMobileNo);
+
+    List getAllBusinessList();
 }

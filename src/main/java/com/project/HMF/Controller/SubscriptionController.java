@@ -44,7 +44,7 @@ public class SubscriptionController {
         return new ResponseEntity(list, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/{subscriptionId}")
+    @GetMapping(value = "/getById/{subscriptionId}")
     private ResponseEntity getSubscriptionById(@PathVariable Integer subscriptionId) {
         SubscriptionMaster subscriptionMaster = subscriptionService.getSubscriptionById(subscriptionId);
         if (subscriptionMaster != null) {

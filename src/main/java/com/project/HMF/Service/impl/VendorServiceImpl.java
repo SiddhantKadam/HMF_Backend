@@ -3,9 +3,11 @@ package com.project.HMF.Service.impl;
 import com.project.HMF.Dao.VendorDao;
 import com.project.HMF.Dto.req.VendorLoginReqDto;
 import com.project.HMF.Dto.req.VendorSubscriptionReqDto;
+import com.project.HMF.Dto.res.BusinessResDto;
 import com.project.HMF.Dto.res.VendorLoginResDto;
 import com.project.HMF.Dto.res.VendorRegistrationResDto;
 import com.project.HMF.Model.CategoryMaster;
+import com.project.HMF.Model.UserMaster;
 import com.project.HMF.Model.VendorMaster;
 import com.project.HMF.Service.VendorService;
 import org.springframework.beans.BeanUtils;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -35,6 +38,7 @@ public class VendorServiceImpl implements VendorService {
                 vendorMaster.setVendorStatus("Active");
                 vendorDao.save(vendorMaster);
                 vendorRegistrationResDto.setMessage("Save Succesfully");
+                vendorRegistrationResDto.setVendorId(vendorMaster.getVendorId());
             } catch (Exception e) {
                 e.printStackTrace();
                 vendorRegistrationResDto.setMessage("Failed");
@@ -52,13 +56,28 @@ public class VendorServiceImpl implements VendorService {
         VendorLoginResDto vendorLoginResDto = new VendorLoginResDto();
         if (vendorMaster != null) {
             if (vendorMaster.getVendorPassword().equals(vendorLoginReqDto.getVendorPassword())) {
-                if (vendorMaster.getVendorStatus().equals("Active")) {
+                if (vendorMaster.getVendorStatus().equals("Active") && vendorMaster.getSubscriptionEndDate().after(new Date())) {
 
                     vendorLoginResDto.setResponseCode(HttpStatus.OK.value());
                     vendorLoginResDto.setMessage("Login Success");
                     BeanUtils.copyProperties(vendorMaster, vendorLoginResDto);
+                    if (vendorMaster.getSubscriptionMaster()!=null)
+                    {
+                        vendorLoginResDto.setSubscriptionId(vendorMaster.getSubscriptionMaster().getSubscriptionId());
+                        vendorLoginResDto.setSubscriptionName(vendorMaster.getSubscriptionMaster().getSubscriptionName());
+                    }
+                    if (vendorMaster.getCategoryMaster()!=null)
+                    {
+                        vendorLoginResDto.setCategoryId(vendorMaster.getCategoryMaster().getCategoryId());
+                        vendorLoginResDto.setCategoryName(vendorMaster.getCategoryMaster().getCategoryName());
+                    }
 
-                } else {
+                }
+                else if (vendorMaster.getVendorStatus().equals("Active") && vendorMaster.getSubscriptionEndDate().before(new Date())) {
+                    vendorLoginResDto.setResponseCode(HttpStatus.FORBIDDEN.value());
+                    vendorLoginResDto.setMessage("Subscription plan is expired");
+                }
+                else {
                     vendorLoginResDto.setResponseCode(HttpStatus.FORBIDDEN.value());
                     vendorLoginResDto.setMessage("Account Has Been Blocked");
                 }
@@ -129,5 +148,34 @@ public class VendorServiceImpl implements VendorService {
     public Boolean updateSubscription(VendorSubscriptionReqDto vendorSubscriptionReqDto) {
         Integer updateSubscription=vendorDao.updateSubscription(vendorSubscriptionReqDto.getVendorId(),vendorSubscriptionReqDto.getSubscriptionId(),new Date());
         return updateSubscription!=0;
+    }
+
+    @Override
+    public Boolean updatePassword(Integer vendorId, String password) {
+        Integer flag = vendorDao.updatePassword(vendorId, password);
+        if (flag == 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public Boolean vendorForgotPassword(String vendorMobileNo) {
+        VendorMaster vendorMaster1 = vendorDao.findOneByVendorMobileNo(vendorMobileNo);
+        if (vendorMaster1 == null) {
+            System.out.println("OTP False");
+            return false;
+        } else {
+            System.out.println("OTP True");
+            return true;
+        }
+    }
+
+    @Override
+    public List getAllBusinessList() {
+//        List<BusinessResDto> businessList = new ArrayList();
+//        businessList = vendorDao.getDateWiseBusinessList();
+        return null;
     }
 }

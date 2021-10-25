@@ -23,10 +23,16 @@ public class SubscriptionMaster {
     private String subscriptionName;
 
     @Column(length = 20)
-    private String subscriptionValidity;
+    private String validityInYears;
+
+    @Column(length = 20)
+    private String validityInMonths;
 
     @Column(length = 20)
     private String subscriptionDescription;
+
+    @Column(length = 20)
+    private Double subscriptionAmount;
 
     @Column(length = 20)
     private String status;

@@ -43,7 +43,7 @@ public class CategoryController {
         return new ResponseEntity(list, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/{categoryId}")
+    @GetMapping(value = "/getById/{categoryId}")
     private ResponseEntity getCategoryById(@PathVariable Integer categoryId) {
         CategoryMaster categoryMaster = categoryService.getCategoryById(categoryId);
         if (categoryMaster != null) {
