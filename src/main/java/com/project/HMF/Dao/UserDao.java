@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface UserDao extends CrudRepository<UserMaster,Integer> {
     UserMaster findOneByUserMobileNo(String userMobileNo);
 
-    UserMaster findAllByUserMobileNo(String userMobileNo);
+    UserMaster findAllByUserMobileNo(String mobileNo);
 
     @Transactional
     @Modifying

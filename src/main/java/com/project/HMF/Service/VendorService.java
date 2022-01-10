@@ -25,5 +25,9 @@ public interface VendorService {
 
     Boolean vendorForgotPassword(String vendorMobileNo);
 
-    List getAllBusinessList();
+    List getByCategoryId(Integer categoryId);
+
+    List searchVendor(String searchText, Integer categoryId);
+
+    Boolean inActiveVendor();
 }

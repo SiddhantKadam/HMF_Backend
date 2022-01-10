@@ -15,6 +15,7 @@ public class VendorLoginResDto {
     private String vendorLName;
     private String vendorMobileNo;
     private String vendorBusinessName;
+    private String vendorBusinessImage;
     private String vendorBusinessCategory;
     private String vendorBusinessAddress;
     private String vendorBusinessProof;

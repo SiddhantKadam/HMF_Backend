@@ -1,11 +1,14 @@
 package com.project.HMF.Service.impl;
 
 import com.project.HMF.Dao.UserDao;
+import com.project.HMF.Dao.VendorDao;
 import com.project.HMF.Dto.req.UserLoginReqDto;
 import com.project.HMF.Dto.res.UserLoginResDto;
 import com.project.HMF.Dto.res.UserRegistrationResDto;
+import com.project.HMF.Dto.res.VendorRegistrationResDto;
 import com.project.HMF.Model.BannerMaster;
 import com.project.HMF.Model.UserMaster;
+import com.project.HMF.Model.VendorMaster;
 import com.project.HMF.Service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,17 +23,26 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserDao userDao;
 
+    @Autowired
+    private VendorDao vendorDao;
+
     @Override
     public UserRegistrationResDto create(UserMaster userMaster) {
 
         UserRegistrationResDto userRegistrationResDto = new UserRegistrationResDto();
         UserMaster userMaster1 = userDao.findOneByUserMobileNo(userMaster.getUserMobileNo());
-        if (userMaster1 == null) {
+        VendorMaster vendorMaster1 = vendorDao.findOneByVendorMobileNo(userMaster.getUserMobileNo());
+        if (userMaster1 == null && vendorMaster1 == null) {
             try {
                 userMaster.setUserStatus("Active");
                 userDao.save(userMaster);
                 userRegistrationResDto.setMessage("Save Succesfully");
                 userRegistrationResDto.setUserId(userMaster.getUserId());
+                userRegistrationResDto.setUserFName(userMaster.getUserFName());
+                userRegistrationResDto.setUserLName(userMaster.getUserLName());
+                userRegistrationResDto.setUserMobileNo(userMaster.getUserMobileNo());
+                userRegistrationResDto.setRegistrationType(userMaster.getRegistrationType());
+                userRegistrationResDto.setUserStatus(userMaster.getUserStatus());
             } catch (Exception e) {
                 e.printStackTrace();
                 userRegistrationResDto.setMessage("Failed");

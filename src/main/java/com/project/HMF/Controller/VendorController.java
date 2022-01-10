@@ -14,6 +14,7 @@ import com.project.HMF.Service.VendorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -61,7 +62,7 @@ public class VendorController {
         }
     }
 
-    @PutMapping(value = "/updateSubscription/{vendorSubscription}")
+    @PutMapping(value = "/updateSubscription/vendorSubscription")
     private ResponseEntity updateSubscription(@RequestBody VendorSubscriptionReqDto vendorSubscriptionReqDto){
         Boolean flag = vendorService.updateSubscription(vendorSubscriptionReqDto);
         return new ResponseEntity(flag, HttpStatus.CREATED);
@@ -80,11 +81,33 @@ public class VendorController {
         return new ResponseEntity(flag,HttpStatus.OK);
     }
 
-    @GetMapping(value = "/businessList")
-    public ResponseEntity getAllBusinessList()
+    @GetMapping(value = "/getVendorByCategoryId/{categoryId}")
+    private ResponseEntity getByCategoryId(@PathVariable Integer categoryId) {
+        List list = vendorService.getByCategoryId(categoryId);
+        return new ResponseEntity(list, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/searchVendor/{searchText}/{categoryId}")
+    private ResponseEntity searchVendor(@PathVariable String searchText,@PathVariable Integer categoryId)
     {
-        List list = vendorService.getAllBusinessList();
-        return new ResponseEntity(list,HttpStatus.OK);
+        List list = vendorService.searchVendor(searchText,categoryId);
+        if(list.size()!=0)
+        {
+            return new ResponseEntity(list,HttpStatus.OK);
+        }
+        else
+        {
+            return new ResponseEntity(list,HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Scheduled(cron = "0 0 1 1/1 * ?")
+    private ResponseEntity inActiveVendor(){
+
+        Boolean flag = vendorService.inActiveVendor();
+
+        if(flag){return new ResponseEntity(flag, HttpStatus.CREATED);}
+        else{return new ResponseEntity(flag,HttpStatus.INTERNAL_SERVER_ERROR);}
     }
 
 }
