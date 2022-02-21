@@ -100,7 +100,7 @@ public class AmazonClient {
         try {
             File file = convertMultiPartToFile(multipartFile);
             String fileName = generateFileName(multipartFile);
-            fileUrl = getEndpointUrl() + "/" + bucketName + "/hmfImages/" + fileName;
+            fileUrl = getEndpointUrl() + "/hmfImages/" + fileName;
             uploadFileTos3bucket(fileName, file);
             file.delete();
         } catch (Exception e) {

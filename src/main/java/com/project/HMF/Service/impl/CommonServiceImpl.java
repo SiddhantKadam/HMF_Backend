@@ -43,6 +43,7 @@ public class CommonServiceImpl implements CommonService {
                     commonLoginResDto.setUserFName(userMaster.getUserFName());
                     commonLoginResDto.setUserLName(userMaster.getUserLName());
                     commonLoginResDto.setUserMobileNo(userMaster.getUserMobileNo());
+                    commonLoginResDto.setUserReferenceMobileNo(userMaster.getUserReferenceMobileNo());
                     commonLoginResDto.setUserStatus(userMaster.getUserStatus());
 //                    BeanUtils.copyProperties(userMaster, userLoginResDto);
 
@@ -54,57 +55,47 @@ public class CommonServiceImpl implements CommonService {
                 commonLoginResDto.setResponseCode(HttpStatus.BAD_REQUEST.value());
                 commonLoginResDto.setMessage("Password Is Invalid");
             }
-        }else if (vendorMaster != null) {
+        } else if (vendorMaster != null) {
             if (vendorMaster.getVendorPassword().equals(commonLoginReqDto.getPassword())) {
-                if (vendorMaster.getVendorStatus().equals("Active") && vendorMaster.getSubscriptionEndDate().after(new Date())) {
 
-                    commonLoginResDto.setResponseCode(HttpStatus.OK.value());
-                    commonLoginResDto.setMessage("Login Success");
+                commonLoginResDto.setResponseCode(HttpStatus.OK.value());
+                commonLoginResDto.setMessage("Login Success");
 
-                    commonLoginResDto.setVendorId(vendorMaster.getVendorId());
-                    commonLoginResDto.setVendorFName(vendorMaster.getVendorFName());
-                    commonLoginResDto.setVendorLName(vendorMaster.getVendorLName());
-                    commonLoginResDto.setVendorMobileNo(vendorMaster.getVendorMobileNo());
-                    commonLoginResDto.setVendorStatus(vendorMaster.getVendorStatus());
-                    commonLoginResDto.setRegistrationType(vendorMaster.getRegistrationType());
+                commonLoginResDto.setVendorId(vendorMaster.getVendorId());
+                commonLoginResDto.setVendorFName(vendorMaster.getVendorFName());
+                commonLoginResDto.setVendorLName(vendorMaster.getVendorLName());
+                commonLoginResDto.setVendorMobileNo(vendorMaster.getVendorMobileNo());
+                commonLoginResDto.setVendorStatus(vendorMaster.getVendorStatus());
+                commonLoginResDto.setRegistrationType(vendorMaster.getRegistrationType());
 
-                    commonLoginResDto.setVendorBusinessName(vendorMaster.getVendorBusinessName());
-                    commonLoginResDto.setVendorBusinessAddress(vendorMaster.getVendorBusinessAddress());
-                    commonLoginResDto.setVendorBusinessProof(vendorMaster.getVendorBusinessProof());
-                    commonLoginResDto.setVendorBusinessImage(vendorMaster.getVendorBusinessImage());
+                commonLoginResDto.setVendorBusinessName(vendorMaster.getVendorBusinessName());
+                commonLoginResDto.setVendorBusinessMobileNo(vendorMaster.getVendorBusinessMobileNo());
+                commonLoginResDto.setVendorReferenceMobileNo(vendorMaster.getVendorReferenceMobileNo());
+                commonLoginResDto.setVendorBusinessAddress(vendorMaster.getVendorBusinessAddress());
+                commonLoginResDto.setVendorBusinessProof(vendorMaster.getVendorBusinessProof());
+                commonLoginResDto.setVendorBusinessImage(vendorMaster.getVendorBusinessImage());
 
-                    commonLoginResDto.setCategoryId(vendorMaster.getCategoryMaster().getCategoryId());
-                    commonLoginResDto.setCategoryName(vendorMaster.getCategoryMaster().getCategoryName());
-
+                commonLoginResDto.setSubscriptionStartDate(vendorMaster.getSubscriptionStartDate());
+                commonLoginResDto.setSubscriptionEndDate(vendorMaster.getSubscriptionEndDate());
+//                    BeanUtils.copyProperties(vendorMaster, vendorLoginResDto);
+                if (vendorMaster.getSubscriptionMaster() != null) {
                     commonLoginResDto.setSubscriptionId(vendorMaster.getSubscriptionMaster().getSubscriptionId());
                     commonLoginResDto.setSubscriptionName(vendorMaster.getSubscriptionMaster().getSubscriptionName());
-                    commonLoginResDto.setSubscriptionStartDate(vendorMaster.getSubscriptionStartDate());
-                    commonLoginResDto.setSubscriptionEndDate(vendorMaster.getSubscriptionEndDate());
-//                    BeanUtils.copyProperties(vendorMaster, vendorLoginResDto);
-                    if (vendorMaster.getSubscriptionMaster()!=null)
-                    {
-                        commonLoginResDto.setSubscriptionId(vendorMaster.getSubscriptionMaster().getSubscriptionId());
-                        commonLoginResDto.setSubscriptionName(vendorMaster.getSubscriptionMaster().getSubscriptionName());
-                    }
-                    if (vendorMaster.getCategoryMaster()!=null)
-                    {
-                        commonLoginResDto.setCategoryId(vendorMaster.getCategoryMaster().getCategoryId());
-                        commonLoginResDto.setCategoryName(vendorMaster.getCategoryMaster().getCategoryName());
-                    }
-
                 }
-                else if (vendorMaster.getVendorStatus().equals("Inactive") && vendorMaster.getSubscriptionEndDate().before(new Date())) {
-                    commonLoginResDto.setResponseCode(HttpStatus.FORBIDDEN.value());
-                    commonLoginResDto.setMessage("Subscription plan is expired");
-                }
-                else {
-                    commonLoginResDto.setResponseCode(HttpStatus.FORBIDDEN.value());
-                    commonLoginResDto.setMessage("Account Has Been Blocked");
+                if (vendorMaster.getCategoryMaster() != null) {
+                    commonLoginResDto.setCategoryId(vendorMaster.getCategoryMaster().getCategoryId());
+                    commonLoginResDto.setCategoryName(vendorMaster.getCategoryMaster().getCategoryName());
                 }
             } else {
                 commonLoginResDto.setResponseCode(HttpStatus.BAD_REQUEST.value());
                 commonLoginResDto.setMessage("Password Is Invalid");
             }
+        } else if (userMaster == null) {
+            commonLoginResDto.setResponseCode(HttpStatus.BAD_REQUEST.value());
+            commonLoginResDto.setMessage("Mobile number not exist");
+        } else if (vendorMaster == null) {
+            commonLoginResDto.setResponseCode(HttpStatus.BAD_REQUEST.value());
+            commonLoginResDto.setMessage("Mobile number not exist");
         }
 
         return commonLoginResDto;

@@ -1,8 +1,8 @@
 package com.project.HMF.Controller;
 
-import com.project.HMF.Dto.req.CommonLoginReqDto;
-import com.project.HMF.Dto.req.UserLoginReqDto;
+import com.project.HMF.Dto.req.*;
 import com.project.HMF.Dto.res.CommonLoginResDto;
+import com.project.HMF.Dto.res.UserForgotResDto;
 import com.project.HMF.Dto.res.UserLoginResDto;
 import com.project.HMF.Dto.res.UserRegistrationResDto;
 import com.project.HMF.Model.BannerMaster;
@@ -48,6 +48,12 @@ public class UserController {
         return new ResponseEntity(list, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/activeUser")
+    private ResponseEntity getActiveUser() {
+        List list = userService.getActiveUser();
+        return new ResponseEntity(list, HttpStatus.OK);
+    }
+
     @GetMapping(value = "/getById/{userId}")
     private ResponseEntity getUserById(@PathVariable Integer userId) {
         UserMaster userMaster = userService.getUserById(userId);
@@ -67,8 +73,23 @@ public class UserController {
     @GetMapping(value = "/userForgotPassword/{userMobileNo}")
     public ResponseEntity userForgotPassword(@PathVariable String userMobileNo)
     {
-        Boolean flag = userService.userForgotPassword(userMobileNo);
+        UserForgotResDto userForgotPassword = userService.userForgotPassword(userMobileNo);
+        return new ResponseEntity(userForgotPassword,HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/validateUserOtp")
+    public ResponseEntity validateOtp(@RequestBody UserValidateOtpReqDto userValidateOtpReqDto)
+    {
+        boolean flag = userService.validateOtp(userValidateOtpReqDto);
         return new ResponseEntity(flag,HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/getReportFromToDate")
+    private ResponseEntity getReportListFromToDate(@RequestBody ReportReqDto reportReqDto)
+    {
+        List list= userService.getUserReporFromToDate(reportReqDto);
+
+        return new ResponseEntity(list, HttpStatus.OK);
     }
 
 }

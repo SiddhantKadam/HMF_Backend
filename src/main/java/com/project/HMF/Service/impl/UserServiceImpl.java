@@ -1,11 +1,13 @@
 package com.project.HMF.Service.impl;
 
+import com.project.HMF.Configuration.RandomNumberGenerator;
+import com.project.HMF.Configuration.SmsPanel;
 import com.project.HMF.Dao.UserDao;
 import com.project.HMF.Dao.VendorDao;
+import com.project.HMF.Dto.req.ReportReqDto;
 import com.project.HMF.Dto.req.UserLoginReqDto;
-import com.project.HMF.Dto.res.UserLoginResDto;
-import com.project.HMF.Dto.res.UserRegistrationResDto;
-import com.project.HMF.Dto.res.VendorRegistrationResDto;
+import com.project.HMF.Dto.req.UserValidateOtpReqDto;
+import com.project.HMF.Dto.res.*;
 import com.project.HMF.Model.BannerMaster;
 import com.project.HMF.Model.UserMaster;
 import com.project.HMF.Model.VendorMaster;
@@ -15,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -35,6 +39,7 @@ public class UserServiceImpl implements UserService {
         if (userMaster1 == null && vendorMaster1 == null) {
             try {
                 userMaster.setUserStatus("Active");
+                userMaster.setRegistrationDate(new Date());
                 userDao.save(userMaster);
                 userRegistrationResDto.setMessage("Save Succesfully");
                 userRegistrationResDto.setUserId(userMaster.getUserId());
@@ -126,14 +131,49 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean userForgotPassword(String userMobileNo) {
-        UserMaster userMaster1 = userDao.findOneByUserMobileNo(userMobileNo);
-        if (userMaster1 == null) {
-            System.out.println("OTP False");
-            return false;
-        } else {
-            System.out.println("OTP True");
-            return true;
+    public UserForgotResDto userForgotPassword(String userMobileNo) {
+        UserForgotResDto userForgotResDto = new UserForgotResDto();
+        UserMaster userMaster = userDao.findOneByUserMobileNo(userMobileNo);
+        if(userMaster != null) {
+            Integer otp = RandomNumberGenerator.getNumber();
+            Integer flag = userDao.updateOtp(userMaster.getUserId(), otp);
+
+            String content = "Humanity M.A.N Foundation \n Your one time OTP: " + otp;
+
+            try {
+                SmsPanel.sendSms(userMaster.getUserMobileNo(), content);
+                userForgotResDto.setUserId(userMaster.getUserId());
+                userForgotResDto.setStatus(true);
+                return userForgotResDto;
+            } catch (Exception e) {
+                userForgotResDto.setStatus(false);
+                return userForgotResDto;
+            }
         }
+        return userForgotResDto;
+    }
+
+    @Override
+    public boolean validateOtp(UserValidateOtpReqDto userValidateOtpReqDto) {
+        UserMaster userMaster = userDao.findOne(userValidateOtpReqDto.getUserId());
+        if(userValidateOtpReqDto.getOtp().equals(userMaster.getOtp())){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public List getActiveUser() {
+        List list = userDao.findAllByUserStatus("Active");
+        return list;
+    }
+
+    @Override
+    public List getUserReporFromToDate(ReportReqDto reportReqDto) {
+
+        List<ReportResDto> reportResList = new ArrayList<>();
+        List<ReportResDto> list = userDao.getUserReportList(reportReqDto.getFromDate(), reportReqDto.getToDate());
+        return list;
     }
 }

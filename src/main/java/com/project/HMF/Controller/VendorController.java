@@ -1,12 +1,7 @@
 package com.project.HMF.Controller;
 
-import com.project.HMF.Dto.req.UserLoginReqDto;
-import com.project.HMF.Dto.req.VendorLoginReqDto;
-import com.project.HMF.Dto.req.VendorSubscriptionReqDto;
-import com.project.HMF.Dto.res.UserLoginResDto;
-import com.project.HMF.Dto.res.UserRegistrationResDto;
-import com.project.HMF.Dto.res.VendorLoginResDto;
-import com.project.HMF.Dto.res.VendorRegistrationResDto;
+import com.project.HMF.Dto.req.*;
+import com.project.HMF.Dto.res.*;
 import com.project.HMF.Model.UserMaster;
 import com.project.HMF.Model.VendorMaster;
 import com.project.HMF.Service.UserService;
@@ -52,6 +47,12 @@ public class VendorController {
         return new ResponseEntity(list, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/getActiveVendor")
+    private ResponseEntity getActiveVendor() {
+        List list = vendorService.getActiveVendor();
+        return new ResponseEntity(list, HttpStatus.OK);
+    }
+
     @GetMapping(value = "/getById/{vendorId}")
     private ResponseEntity getVendorById(@PathVariable Integer vendorId) {
         VendorMaster vendorMaster = vendorService.getVendorById(vendorId);
@@ -77,7 +78,18 @@ public class VendorController {
     @GetMapping(value = "/vendorForgotPassword/{vendorMobileNo}")
     public ResponseEntity vendorForgotPassword(@PathVariable String vendorMobileNo)
     {
-        Boolean flag = vendorService.vendorForgotPassword(vendorMobileNo);
+        VendorForgotResDto vendorForgotResDto = vendorService.vendorForgotPassword(vendorMobileNo);
+        if (vendorForgotResDto != null) {
+            return new ResponseEntity(vendorForgotResDto, HttpStatus.OK);
+        } else {
+            return new ResponseEntity(vendorForgotResDto, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping(value = "/validateVendorOtp")
+    public ResponseEntity validateOtp(@RequestBody VendorValidateOtpReqDto vendorValidateOtpReqDto)
+    {
+        boolean flag = vendorService.validateOtp(vendorValidateOtpReqDto);
         return new ResponseEntity(flag,HttpStatus.OK);
     }
 
@@ -108,6 +120,31 @@ public class VendorController {
 
         if(flag){return new ResponseEntity(flag, HttpStatus.CREATED);}
         else{return new ResponseEntity(flag,HttpStatus.INTERNAL_SERVER_ERROR);}
+    }
+
+    @PostMapping(value = "/getReportFromToDate")
+    private ResponseEntity getReportListFromToDate(@RequestBody ReportReqDto reportReqDto)
+    {
+        List list= vendorService.getVendorReporFromToDate(reportReqDto);
+
+        return new ResponseEntity(list, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/deleteVendorImage/{vendorImageId}")
+    private ResponseEntity deleteVendorImage(@PathVariable Integer vendorImageId)
+    {
+        Boolean flag = vendorService.deleteVendorImage(vendorImageId);
+
+        if(flag){return new ResponseEntity(flag, HttpStatus.CREATED);}
+        else{return new ResponseEntity(flag,HttpStatus.INTERNAL_SERVER_ERROR);}
+    }
+
+    @GetMapping(value = "/getVendorImage/{vendorId}")
+    private ResponseEntity getVendorImage(@PathVariable Integer vendorId)
+    {
+        List list = vendorService.getVendorImage(vendorId);
+
+        return new ResponseEntity(list, HttpStatus.OK);
     }
 
 }

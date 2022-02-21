@@ -1,17 +1,17 @@
 package com.project.HMF.Service.impl;
 
+import com.project.HMF.Configuration.RandomNumberGenerator;
+import com.project.HMF.Configuration.SmsPanel;
 import com.project.HMF.Dao.SubscriptionDao;
 import com.project.HMF.Dao.UserDao;
 import com.project.HMF.Dao.VendorDao;
+import com.project.HMF.Dao.VendorImagesDao;
+import com.project.HMF.Dto.req.ReportReqDto;
 import com.project.HMF.Dto.req.VendorLoginReqDto;
 import com.project.HMF.Dto.req.VendorSubscriptionReqDto;
-import com.project.HMF.Dto.res.BusinessResDto;
-import com.project.HMF.Dto.res.VendorLoginResDto;
-import com.project.HMF.Dto.res.VendorRegistrationResDto;
-import com.project.HMF.Model.CategoryMaster;
-import com.project.HMF.Model.SubscriptionMaster;
-import com.project.HMF.Model.UserMaster;
-import com.project.HMF.Model.VendorMaster;
+import com.project.HMF.Dto.req.VendorValidateOtpReqDto;
+import com.project.HMF.Dto.res.*;
+import com.project.HMF.Model.*;
 import com.project.HMF.Service.VendorService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +30,9 @@ public class VendorServiceImpl implements VendorService {
     private VendorDao vendorDao;
 
     @Autowired
+    private VendorImagesDao vendorImagesDao;
+
+    @Autowired
     private UserDao userDao;
 
     @Autowired
@@ -41,26 +44,54 @@ public class VendorServiceImpl implements VendorService {
         VendorRegistrationResDto vendorRegistrationResDto = new VendorRegistrationResDto();
         UserMaster userMaster1 = userDao.findOneByUserMobileNo(vendorMaster.getVendorMobileNo());
         VendorMaster vendorMaster1 = vendorDao.findOneByVendorMobileNo(vendorMaster.getVendorMobileNo());
+        Boolean flag = false;
         if (vendorMaster1 == null && userMaster1 == null) {
             try {
                 CategoryMaster categoryMaster = new CategoryMaster();
                 categoryMaster.setCategoryId(vendorMaster.getCategoryId());
                 vendorMaster.setCategoryMaster(categoryMaster);
 
+                vendorMaster.setVendorRegistrationDate(new Date());
                 vendorMaster.setVendorStatus("Active");
                 vendorDao.save(vendorMaster);
                 vendorRegistrationResDto.setMessage("Save Succesfully");
+
+                if(vendorMaster.getVendorImagesList()!=null) {
+                    if (vendorMaster.getVendorImagesList().size() != 0) {
+                        for (VendorImages vendorImages : vendorMaster.getVendorImagesList()) {
+                            VendorImages vendorImages1 = new VendorImages();
+                            vendorImages1.setVendorImagePath(vendorImages.getVendorImagePath());
+                            vendorImages1.setVendorImageStatus("Active");
+                            vendorImages1.setVendorMaster(vendorMaster);
+
+                            try {
+                                vendorImagesDao.save(vendorImages1);
+                                flag = true;
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                flag = false;
+                            }
+                        }
+                    }
+                }
+
                 vendorRegistrationResDto.setVendorId(vendorMaster.getVendorId());
                 vendorRegistrationResDto.setVendorFName(vendorMaster.getVendorFName());
                 vendorRegistrationResDto.setVendorLName(vendorMaster.getVendorLName());
                 vendorRegistrationResDto.setVendorMobileNo(vendorMaster.getVendorMobileNo());
+                vendorRegistrationResDto.setVendorBusinessMobileNo(vendorMaster.getVendorBusinessMobileNo());
+                vendorRegistrationResDto.setVendorReferenceMobileNo(vendorMaster.getVendorReferenceMobileNo());
                 vendorRegistrationResDto.setRegistrationType(vendorMaster.getRegistrationType());
+                vendorRegistrationResDto.setVendorDescription(vendorMaster.getVendorDescription());
                 vendorRegistrationResDto.setVendorStatus(vendorMaster.getVendorStatus());
 
                 vendorRegistrationResDto.setVendorBusinessName(vendorMaster.getVendorBusinessName());
                 vendorRegistrationResDto.setVendorBusinessAddress(vendorMaster.getVendorBusinessAddress());
                 vendorRegistrationResDto.setVendorBusinessProof(vendorMaster.getVendorBusinessProof());
                 vendorRegistrationResDto.setVendorBusinessImage(vendorMaster.getVendorBusinessImage());
+                vendorRegistrationResDto.setVendorOpeningTime(vendorMaster.getVendorOpeningTime());
+                vendorRegistrationResDto.setVendorClosingTime(vendorMaster.getVendorClosingTime());
+                vendorRegistrationResDto.setVendorHoliday(vendorMaster.getVendorHoliday());
 
                 if (vendorMaster.getCategoryMaster() != null) {
                     vendorRegistrationResDto.setCategoryId(vendorMaster.getCategoryMaster().getCategoryId());
@@ -74,6 +105,17 @@ public class VendorServiceImpl implements VendorService {
 
                 vendorRegistrationResDto.setSubscriptionStartDate(vendorMaster.getSubscriptionStartDate());
                 vendorRegistrationResDto.setSubscriptionEndDate(vendorMaster.getSubscriptionEndDate());
+
+                List<VendorImagesResDto> vendorImagesList = new ArrayList();
+
+                try{
+                    vendorImagesList = vendorImagesDao.findAllImagesByVendorId(vendorMaster.getVendorId());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                vendorRegistrationResDto.setVendorImagesList(vendorImagesList);
+
+
             } catch (Exception e) {
                 e.printStackTrace();
                 vendorRegistrationResDto.setMessage("Failed");
@@ -136,6 +178,13 @@ public class VendorServiceImpl implements VendorService {
                 vendorMaster.setCategoryId(vendorMaster.getCategoryMaster().getCategoryId());
                 vendorMaster.setCategoryName(vendorMaster.getCategoryMaster().getCategoryName());
             }
+            List<VendorImages> vendorImagesList = new ArrayList();
+            try{
+                vendorImagesList = vendorImagesDao.findAllImagesByVendorIdTwo(vendorMaster.getVendorId());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            vendorMaster.setVendorImagesList(vendorImagesList);
         }
         return list;
     }
@@ -149,6 +198,18 @@ public class VendorServiceImpl implements VendorService {
                 vendorMaster.setCategoryId(vendorMaster.getCategoryMaster().getCategoryId());
                 vendorMaster.setCategoryName(vendorMaster.getCategoryMaster().getCategoryName());
             }
+            if (vendorMaster.getSubscriptionMaster() != null) {
+                vendorMaster.setSubscriptionId(vendorMaster.getSubscriptionMaster().getSubscriptionId());
+                vendorMaster.setSubscriptionName(vendorMaster.getSubscriptionMaster().getSubscriptionName());
+            }
+            List<VendorImages> vendorImagesList = new ArrayList();
+            try{
+                vendorImagesList = vendorImagesDao.findAllImagesByVendorIdTwo(vendorMaster.getVendorId());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            vendorMaster.setVendorImagesList(vendorImagesList);
+
             return vendorMaster;
         } catch (Exception e) {
             e.printStackTrace();
@@ -159,12 +220,68 @@ public class VendorServiceImpl implements VendorService {
     @Override
     public VendorRegistrationResDto update(VendorMaster vendorMaster) {
         VendorRegistrationResDto vendorRegistrationResDto = new VendorRegistrationResDto();
+        Boolean flag = false;
         try {
             CategoryMaster categoryMaster = new CategoryMaster();
             categoryMaster.setCategoryId(vendorMaster.getCategoryId());
             vendorMaster.setCategoryMaster(categoryMaster);
             vendorDao.save(vendorMaster);
             vendorRegistrationResDto.setMessage("Update Succesfully");
+
+            if(vendorMaster.getVendorImagesList()!=null) {
+                if (vendorMaster.getVendorImagesList().size() != 0) {
+                    for (VendorImages vendorImages : vendorMaster.getVendorImagesList()) {
+                        VendorImages vendorImages1 = new VendorImages();
+                        vendorImages1.setVendorImagePath(vendorImages.getVendorImagePath());
+                        vendorImages1.setVendorImageStatus("Active");
+                        vendorImages1.setVendorMaster(vendorMaster);
+
+                        try {
+                            vendorImagesDao.save(vendorImages1);
+                            flag = true;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            flag = false;
+                        }
+                    }
+                }
+            }
+
+            vendorRegistrationResDto.setVendorId(vendorMaster.getVendorId());
+            vendorRegistrationResDto.setVendorFName(vendorMaster.getVendorFName());
+            vendorRegistrationResDto.setVendorLName(vendorMaster.getVendorLName());
+            vendorRegistrationResDto.setVendorMobileNo(vendorMaster.getVendorMobileNo());
+            vendorRegistrationResDto.setVendorBusinessMobileNo(vendorMaster.getVendorBusinessMobileNo());
+            vendorRegistrationResDto.setVendorReferenceMobileNo(vendorMaster.getVendorReferenceMobileNo());
+            vendorRegistrationResDto.setRegistrationType(vendorMaster.getRegistrationType());
+            vendorRegistrationResDto.setVendorDescription(vendorMaster.getVendorDescription());
+            vendorRegistrationResDto.setVendorStatus(vendorMaster.getVendorStatus());
+
+            vendorRegistrationResDto.setVendorBusinessName(vendorMaster.getVendorBusinessName());
+            vendorRegistrationResDto.setVendorBusinessAddress(vendorMaster.getVendorBusinessAddress());
+            vendorRegistrationResDto.setVendorBusinessProof(vendorMaster.getVendorBusinessProof());
+            vendorRegistrationResDto.setVendorBusinessImage(vendorMaster.getVendorBusinessImage());
+            vendorRegistrationResDto.setVendorOpeningTime(vendorMaster.getVendorOpeningTime());
+            vendorRegistrationResDto.setVendorClosingTime(vendorMaster.getVendorClosingTime());
+            vendorRegistrationResDto.setVendorHoliday(vendorMaster.getVendorHoliday());
+
+            if (vendorMaster.getCategoryMaster() != null) {
+                vendorRegistrationResDto.setCategoryId(vendorMaster.getCategoryMaster().getCategoryId());
+                vendorRegistrationResDto.setCategoryName(vendorMaster.getCategoryMaster().getCategoryName());
+            }
+
+            vendorRegistrationResDto.setSubscriptionStartDate(vendorMaster.getSubscriptionStartDate());
+            vendorRegistrationResDto.setSubscriptionEndDate(vendorMaster.getSubscriptionEndDate());
+
+            List<VendorImagesResDto> vendorImagesList = new ArrayList();
+
+            try{
+                vendorImagesList = vendorImagesDao.findAllImagesByVendorId(vendorMaster.getVendorId());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            vendorRegistrationResDto.setVendorImagesList(vendorImagesList);
+
         } catch (Exception e) {
             e.printStackTrace();
             vendorRegistrationResDto.setMessage("Failed");
@@ -208,14 +325,35 @@ public class VendorServiceImpl implements VendorService {
     }
 
     @Override
-    public Boolean vendorForgotPassword(String vendorMobileNo) {
-        VendorMaster vendorMaster1 = vendorDao.findOneByVendorMobileNo(vendorMobileNo);
-        if (vendorMaster1 == null) {
-            System.out.println("OTP False");
-            return false;
-        } else {
-            System.out.println("OTP True");
+    public VendorForgotResDto vendorForgotPassword(String vendorMobileNo) {
+        VendorForgotResDto vendorForgotResDto = new VendorForgotResDto();
+        VendorMaster vendorMaster = vendorDao.findOneByVendorMobileNo(vendorMobileNo);
+        if(vendorMaster != null) {
+            Integer otp = RandomNumberGenerator.getNumber();
+            Integer flag = vendorDao.updateOtp(vendorMaster.getVendorId(), otp);
+
+            String content = "Humanity M.A.N Foundation \n Your one time OTP: " + otp;
+
+            try {
+                SmsPanel.sendSms(vendorMaster.getVendorMobileNo(), content);
+                vendorForgotResDto.setVendorId(vendorMaster.getVendorId());
+                vendorForgotResDto.setStatus(true);
+                return vendorForgotResDto;
+            } catch (Exception e) {
+                vendorForgotResDto.setStatus(false);
+                return vendorForgotResDto;
+            }
+        }
+        return vendorForgotResDto;
+    }
+
+    @Override
+    public boolean validateOtp(VendorValidateOtpReqDto vendorValidateOtpReqDto) {
+        VendorMaster vendorMaster = vendorDao.findOne(vendorValidateOtpReqDto.getVendorId());
+        if(vendorValidateOtpReqDto.getOtp().equals(vendorMaster.getOtp())){
             return true;
+        } else {
+            return false;
         }
     }
 
@@ -231,6 +369,13 @@ public class VendorServiceImpl implements VendorService {
                 vendorMaster.setSubscriptionId(vendorMaster.getSubscriptionMaster().getSubscriptionId());
                 vendorMaster.setSubscriptionName(vendorMaster.getSubscriptionMaster().getSubscriptionName());
             }
+            List<VendorImages> vendorImagesList = new ArrayList();
+            try{
+                vendorImagesList = vendorImagesDao.findAllImagesByVendorIdTwo(vendorMaster.getVendorId());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            vendorMaster.setVendorImagesList(vendorImagesList);
         }
         return list;
     }
@@ -262,5 +407,54 @@ public class VendorServiceImpl implements VendorService {
             }
         }
         return flag;
+    }
+
+    @Override
+    public List getActiveVendor() {
+        List<VendorMaster> list = vendorDao.findAllByVendorStatus();
+        for (VendorMaster vendorMaster : list) {
+            if (vendorMaster.getCategoryMaster() != null) {
+                vendorMaster.setCategoryId(vendorMaster.getCategoryMaster().getCategoryId());
+                vendorMaster.setCategoryName(vendorMaster.getCategoryMaster().getCategoryName());
+            }
+            if (vendorMaster.getSubscriptionMaster() != null) {
+                vendorMaster.setSubscriptionId(vendorMaster.getSubscriptionMaster().getSubscriptionId());
+                vendorMaster.setSubscriptionName(vendorMaster.getSubscriptionMaster().getSubscriptionName());
+            }
+            List<VendorImages> vendorImagesList = new ArrayList();
+            try{
+                vendorImagesList = vendorImagesDao.findAllImagesByVendorIdTwo(vendorMaster.getVendorId());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            vendorMaster.setVendorImagesList(vendorImagesList);
+        }
+        return list;
+    }
+
+    @Override
+    public List getVendorReporFromToDate(ReportReqDto reportReqDto) {
+
+        List<VendorReportResDto> reportResList = new ArrayList<>();
+        List<VendorReportResDto> list = vendorDao.getVendorReportList(reportReqDto.getFromDate(), reportReqDto.getToDate());
+        return list;
+
+    }
+
+    @Override
+    public Boolean deleteVendorImage(Integer vendorImageId) {
+        vendorDao.deleteByVendorId(vendorImageId);
+        return true;
+    }
+
+    @Override
+    public List getVendorImage(Integer vendorId) {
+        List<VendorImages> vendorImagesList = new ArrayList();
+        try{
+            vendorImagesList = vendorImagesDao.findAllImagesByVendorIdTwo(vendorId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return vendorImagesList;
     }
 }

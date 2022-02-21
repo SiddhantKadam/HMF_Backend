@@ -13,12 +13,15 @@ public class CommonLoginResDto {
     private String userFName;
     private String userLName;
     private String userMobileNo;
+    private String userReferenceMobileNo;
     private String userStatus;
 
     private Integer vendorId;
     private String vendorFName;
     private String vendorLName;
     private String vendorMobileNo;
+    private String vendorBusinessMobileNo;
+    private String vendorReferenceMobileNo;
     private String vendorBusinessName;
     private String vendorBusinessImage;
     private String vendorBusinessAddress;

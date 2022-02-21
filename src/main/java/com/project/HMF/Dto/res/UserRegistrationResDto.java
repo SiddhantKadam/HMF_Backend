@@ -11,6 +11,7 @@ public class UserRegistrationResDto {
     private String userFName;
     private String userLName;
     private String userMobileNo;
+    private String userReferenceMobileNo;
     private String registrationType;
     private String userStatus;
 

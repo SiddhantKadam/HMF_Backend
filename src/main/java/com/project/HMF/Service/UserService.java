@@ -1,6 +1,9 @@
 package com.project.HMF.Service;
 
+import com.project.HMF.Dto.req.ReportReqDto;
 import com.project.HMF.Dto.req.UserLoginReqDto;
+import com.project.HMF.Dto.req.UserValidateOtpReqDto;
+import com.project.HMF.Dto.res.UserForgotResDto;
 import com.project.HMF.Dto.res.UserLoginResDto;
 import com.project.HMF.Dto.res.UserRegistrationResDto;
 import com.project.HMF.Model.UserMaster;
@@ -20,5 +23,11 @@ public interface UserService {
 
     Boolean updatePassword(Integer userId, String password);
 
-    Boolean userForgotPassword(String userMobileNo);
+    UserForgotResDto userForgotPassword(String userMobileNo);
+
+    List getUserReporFromToDate(ReportReqDto reportReqDto);
+
+    List getActiveUser();
+
+    boolean validateOtp(UserValidateOtpReqDto userValidateOtpReqDto);
 }
